@@ -1,4 +1,4 @@
-package emm_local_proxy
+package main
 
 import (
 	"errors"
