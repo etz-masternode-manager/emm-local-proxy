@@ -82,6 +82,25 @@ func processRequest(w http.ResponseWriter, r *http.Request) {
 		w.WriteHeader(response.StatusCode)
 
 		io.Copy(w, response.Body)
+	case "masternode":
+		var mnRequest MasternodeRequest
+		err := json.NewDecoder(bytes.NewReader(body)).Decode(&mnRequest)
+		if err != nil {
+			w.WriteHeader(http.StatusBadRequest)
+			responseError(w, "Can't parse request: "+err.Error())
+			return
+		}
+
+		response, err := MasternodeRequestProcess(mnRequest)
+
+		if err != nil {
+			w.WriteHeader(http.StatusUnprocessableEntity)
+			responseError(w, "Can't perform Geth request: "+err.Error())
+			return
+		}
+
+		w.WriteHeader(200)
+		w.Write([]byte(response))
 	}
 
 }
