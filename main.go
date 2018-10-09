@@ -127,6 +127,6 @@ func main() {
 	InitializePublicKey()
 
 	http.HandleFunc("/", processRequest)
-	log.Println("Starting EMM Local Proxy on port 3421")
-	log.Fatal(http.ListenAndServe(":34521", nil))
+	log.Println("Starting EMM Local Proxy on port 45678")
+	log.Fatal(http.ListenAndServe(":45678", nil))
 }
