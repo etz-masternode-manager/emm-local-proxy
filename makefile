@@ -1,4 +1,4 @@
 all: build
 build:
-	go build -o bin/emm-local-proxy -v
+	go build -o bin/emm-proxy -v
 	cp publickey bin/publickey
