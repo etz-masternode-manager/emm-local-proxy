@@ -17,8 +17,23 @@ type GethRequest struct {
 	Request string `json:"request"`
 }
 
+type Response struct {
+	Result string `json:"result"`
+}
+
 type ResponseError struct {
 	Error string `json:"error"`
+}
+
+func responseResult(w io.Writer, result []byte) error {
+	/*encrypted, err := encrypt(result)
+	if err != nil {
+		return responseError(w, err.Error())
+	}
+	*/
+	var response Response
+	response.Result = string(result) // base64.StdEncoding.EncodeToString(encrypted)
+	return json.NewEncoder(w).Encode(response)
 }
 
 func responseError(w io.Writer, err string) error {
@@ -72,16 +87,21 @@ func processRequest(w http.ResponseWriter, r *http.Request) {
 			return
 		}
 
-		response, err := http.Post("http://localhost:"+strconv.Itoa(gethRequest.Port), "application/json", strings.NewReader(gethRequest.Request))
+		response, err := http.Post("http://195.201.168.10:"+strconv.Itoa(gethRequest.Port), "application/json", strings.NewReader(gethRequest.Request))
 		if err != nil {
 			w.WriteHeader(http.StatusUnprocessableEntity)
 			responseError(w, "Can't perform Geth request: "+err.Error())
 			return
 		}
 
-		w.WriteHeader(response.StatusCode)
+		responseBody, err := ioutil.ReadAll(response.Body)
+		if err != nil {
+			w.WriteHeader(http.StatusUnprocessableEntity)
+			responseError(w, "Request performed, buy can't read Geth response: "+err.Error())
+			return
+		}
 
-		io.Copy(w, response.Body)
+		responseResult(w, responseBody)
 	case "masternode":
 		var mnRequest MasternodeRequest
 		err := json.NewDecoder(bytes.NewReader(body)).Decode(&mnRequest)
@@ -99,10 +119,8 @@ func processRequest(w http.ResponseWriter, r *http.Request) {
 			return
 		}
 
-		w.WriteHeader(200)
-		w.Write([]byte(response))
+		responseResult(w, []byte(response))
 	}
-
 }
 
 func main() {
