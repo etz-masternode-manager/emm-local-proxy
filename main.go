@@ -87,7 +87,7 @@ func processRequest(w http.ResponseWriter, r *http.Request) {
 			return
 		}
 
-		response, err := http.Post("http://195.201.168.10:"+strconv.Itoa(gethRequest.Port), "application/json", strings.NewReader(gethRequest.Request))
+		response, err := http.Post("http://localhost:"+strconv.Itoa(gethRequest.Port), "application/json", strings.NewReader(gethRequest.Request))
 		if err != nil {
 			w.WriteHeader(http.StatusUnprocessableEntity)
 			responseError(w, "Can't perform Geth request: "+err.Error())
